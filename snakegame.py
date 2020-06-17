@@ -10,10 +10,9 @@ score = 0
 high_score = 0
 
 # Set up our screen
-
 wn = turtle.Screen()
 wn.title("Snake Game")
-wn.bgcolor("black")
+wn.bgcolor("#cbcba9")
 wn.setup(width=600, height=600)
 wn.tracer(0)
 
@@ -31,22 +30,33 @@ food = turtle.Turtle()
 food.speed(0)
 food.shape("square")
 food.color("red")
+food.shapesize(stretch_wid=1, stretch_len=1, outline=None)
 food.penup()
 food.goto(0,100)
-
-segments = []
 
 # Pen
 pen = turtle.Turtle()
 pen.speed(0)
 pen.shape("square")
-pen.color("white")
+pen.color("black")
 pen.penup()
 pen.hideturtle()
+
+pen.clear()
+pen.goto(-270,260)
+pen.write(f"Score : {score}",align="left", font=("courier", 14,"normal"))
 pen.goto(0,260)
-pen.write("Score: 0 High Score: 0", align="center", font=("courier", 24,"normal"))
+pen.write(f"High Score : {high_score}",align="left", font=("courier", 14,"normal"))
 
+segments = []
 
+# Update Score Board
+def write_screen():
+    pen.clear()
+    pen.goto(-270,260)
+    pen.write(f"Score : {score}",align="left", font=("courier", 14,"normal"))
+    pen.goto(0,260)
+    pen.write(f"High Score : {high_score}",align="left", font=("courier", 14,"normal"))
 
 # Functions
 def go_up():
@@ -83,10 +93,26 @@ def move():
         x = head.xcor()
         head.setx(x + 20)
 
-def write_score():
-    pen.clear()
-    pen.write(f"Score : {score} High Score : {high_score}",align="center", font=("courier", 24,"normal"))
+def write_score(statement):
+    global score
+    global high_score
 
+    if  statement == "win":
+        # Increase score
+        score += 10
+        print("Horaayy! +10 points! ...")
+
+        if score > high_score:
+            high_score = score
+            print("New Record Champ! Continue ...")
+
+    if statement == "lose":
+        # Reset the score
+        score = 0
+        print("Oooo. You dead ...")
+
+ 
+    write_screen()    
 
 # Keyboard Bindings
 wn.listen()
@@ -95,39 +121,51 @@ wn.onkeypress(go_down, "Down")
 wn.onkeypress(go_left, "Left")
 wn.onkeypress(go_right, "Right")
 
-
+print("The game starts. Let us play ...")
 
 
 # Main Game Loop
 while True:
     wn.update()
+    # # Check for collison on border
+    # if head.xcor() > 290 or head.xcor() < -290 or head.ycor() > 290 or head.ycor() < -290:
+    #     time.sleep(1)
+    #     head.goto(0, 0)
+    #     head.direction = "stop"
 
-    # Check for collison on border
-    if head.xcor() > 290 or head.xcor() < -290 or head.ycor() > 290 or head.ycor() < -290:
-        time.sleep(1)
-        head.goto(0, 0)
-        head.direction = "stop"
+    #     # Hide the segments
+    #     for segment in segments:
+    #         segment.goto(1000, 1000)
 
-        # Hide the segments
-        for segment in segments:
-            segment.goto(1000, 1000)
+    #     # Clear the segments list
+    #     segments.clear()
 
-        # Clear the segments list
-        segments.clear()
+    #     # Reset the delay
 
-        # Reset the delay
+    #     delay = 0.1
 
-        delay = 0.1
+    #     # Reset the score
+    #     score = 0
 
-        # Reset the score
-        score = 0
+    #     write_score()
 
-        write_score()
+    # Passing the borders
+    if head.xcor() > 290:
+        head.goto(head.xcor()-(2*290),head.ycor())
+
+    if head.xcor() < -290:
+        head.goto(head.xcor()+(2*290),head.ycor())
+
+    if head.ycor() > 290:
+        head.goto(head.xcor(),head.ycor()-(2*290))
+
+    if head.ycor() < -290:
+        head.goto(head.xcor(),head.ycor()+(2*290))
 
     # Check for collision with food
     if head.distance(food) < 20 :
-        x = random.randint(-290,290)
-        y = random.randint(-290,290)
+        x = random.randrange(-290, 290, 1)
+        y = random.randrange(-290, 290, 1)
         food.goto(x, y)
 
         # Add a segments to list
@@ -141,12 +179,7 @@ while True:
         # Shorten the delay
         delay -= 0.001
 
-        # Increase score
-        score += 10
-        if score > high_score:
-            high_score = score
-
-        write_score()
+        write_score("win")
 
     # Get ready to add segments
     for index in range(len(segments)-1, 0, -1):
@@ -179,11 +212,7 @@ while True:
             # Reset the delay
 
             delay = 0.1
-
-            # Reset the score
-            score = 0
-
-            write_score()
+            write_score("lose")
 
 
     time.sleep(delay)   
